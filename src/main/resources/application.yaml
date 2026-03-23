@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: nutrition-system
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+    driverClassName: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sqq: true
+    properties:
+      hibernate.formata_sql: true
