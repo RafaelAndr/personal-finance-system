@@ -21,7 +21,7 @@ public class Address {
     private String number;
 
     @Column(name = "neighborhood")
-    private String Neighborhood;
+    private String neighborhood;
 
     @Column(name = "city")
     private String city;
@@ -29,6 +29,6 @@ public class Address {
     @Column(name = "state")
     private String state;
 
-    @Column(name = "cep")
-    private String cep;
+    @Column(name = "zip_code")
+    private String zipCode;
 }
