@@ -56,6 +56,10 @@ public class PatientService {
         patientRepository.save(patient);
     }
 
+    public void deletePatient(UUID id) {
+        patientRepository.deleteById(id);
+    }
+
 
     private void checkDuplicatedCpf(String cpf){
         if (patientRepository.existsByCpf(cpf)) {
