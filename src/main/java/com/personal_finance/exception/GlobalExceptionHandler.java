@@ -1,6 +1,5 @@
-package com.personal_finance.GlobalHandler;
+package com.personal_finance.exception;
 
-import com.personal_finance.exception.DuplicatedCpfException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.FieldError;

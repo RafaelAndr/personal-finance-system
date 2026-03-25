@@ -1,6 +1,6 @@
 package com.personal_finance.entity;
 
-import com.personal_finance.enums.Role;
+import com.personal_finance.entity.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
