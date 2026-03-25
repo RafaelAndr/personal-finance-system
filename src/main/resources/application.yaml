@@ -1,6 +1,6 @@
 spring:
   application:
-    name: nutrition-system
+    name: personal-finance
   mvc:
     locale-resolver: fixed
     locale: pt_BR
