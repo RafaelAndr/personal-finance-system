@@ -1,6 +1,9 @@
 spring:
   application:
     name: nutrition-system
+  mvc:
+    locale-resolver: fixed
+    locale: pt_BR
   datasource:
     url: ${DATASOURCE_URL}
     username: ${DATASOURCE_USERNAME}
