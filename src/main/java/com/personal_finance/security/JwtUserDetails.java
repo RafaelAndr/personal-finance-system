@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public class JwtUserDetails extends User {
 
-    private Users user;
+    private final Users user;
 
     public JwtUserDetails(Users user) {
         super(user.getUsername(), user.getPassword(), AuthorityUtils.createAuthorityList(user.getRole().name()));
