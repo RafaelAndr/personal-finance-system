@@ -2,7 +2,6 @@ package com.personal_finance.security;
 
 import com.personal_finance.entity.Users;
 import com.personal_finance.entity.enums.Role;
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
