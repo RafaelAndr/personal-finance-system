@@ -1,5 +1,6 @@
 package com.personal_finance.controller;
 
+import com.personal_finance.dto.account.AccountBalanceDto;
 import com.personal_finance.dto.response.AccountResponseDto;
 import com.personal_finance.dto.resquest.AccountRequestDto;
 import com.personal_finance.entity.Account;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -37,5 +39,10 @@ public class AccountController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) throws AccessDeniedException {
         accountService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<AccountBalanceDto>> getBalanceOfAllAccounts(){
+        return ResponseEntity.ok(accountService.getBalanceOfAllAccounts());
     }
 }
