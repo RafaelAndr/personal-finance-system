@@ -14,6 +14,10 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private Users user;
+
     @Column(name = "bank_name")
     private String bankName;
 
