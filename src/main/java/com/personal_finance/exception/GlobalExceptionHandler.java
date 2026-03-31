@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.net.URI;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -39,14 +40,14 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(DuplicatedCpfException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ProblemDetail handleDuplicatedCpfException(DuplicatedCpfException e){
+    @ExceptionHandler(AccountHasNoUserException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ProblemDetail handleAccountGasNoUserException(AccountHasNoUserException e){
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_ENTITY);
 
-        var problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
-
-        problemDetail.setTitle("Conflict: Existing Cpf");
+        problemDetail.setTitle("Business rule violation");
+        problemDetail.setType(URI.create("https://api.spring-finance.com.br/erros/account-no-user"));
+        problemDetail.setDetail(e.getMessage());
 
         return problemDetail;
     }
