@@ -5,8 +5,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -31,17 +34,16 @@ public class Users {
     @Column(name = "role", nullable = false, length = 25)
     private Role role;
 
+    @CreationTimestamp
     @Column(name = "creation_date")
     private LocalDateTime creationDate;
 
+    @UpdateTimestamp
     @Column(name = "modification_date")
     private LocalDateTime modificationDate;
 
-    @Column(name = "created_by")
-    private String createdBy;
-
-    @Column(name = "modified_by")
-    private String modifiedBy;
+    @OneToMany(mappedBy = "user")
+    private List<Account> accounts;
 
     @Override
     public boolean equals(Object o) {
