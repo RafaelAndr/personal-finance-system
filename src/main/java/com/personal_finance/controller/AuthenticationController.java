@@ -1,6 +1,6 @@
 package com.personal_finance.controller;
 
-import com.personal_finance.dto.resquest.LoginUserDto;
+import com.personal_finance.dto.user.LoginUserDto;
 import com.personal_finance.exception.ErrorMessage;
 import com.personal_finance.security.JwtToken;
 import com.personal_finance.security.JwtUserDetailsService;

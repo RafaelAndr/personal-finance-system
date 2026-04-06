@@ -1,4 +1,4 @@
-package com.personal_finance.dto.resquest;
+package com.personal_finance.dto.user;
 
 import com.personal_finance.entity.enums.Role;
 

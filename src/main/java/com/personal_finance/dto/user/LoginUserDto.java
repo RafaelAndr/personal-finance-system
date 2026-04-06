@@ -1,4 +1,4 @@
-package com.personal_finance.dto.resquest;
+package com.personal_finance.dto.user;
 
 public record LoginUserDto(
         String username,

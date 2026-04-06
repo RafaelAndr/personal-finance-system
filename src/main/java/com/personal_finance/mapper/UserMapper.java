@@ -1,7 +1,7 @@
 package com.personal_finance.mapper;
 
-import com.personal_finance.dto.response.UserResponseDto;
-import com.personal_finance.dto.resquest.UserRequestDto;
+import com.personal_finance.dto.user.UserResponseDto;
+import com.personal_finance.dto.user.UserRequestDto;
 import com.personal_finance.entity.Users;
 import org.mapstruct.Mapper;
 
