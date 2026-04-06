@@ -51,4 +51,16 @@ public class GlobalExceptionHandler {
 
         return problemDetail;
     }
+
+    @ExceptionHandler(ExpenseAlreadyPaidException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ProblemDetail ExpenseAlreadyPaidException(ExpenseAlreadyPaidException e){
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_ENTITY);
+
+        problemDetail.setTitle("Business rule violation");
+        problemDetail.setType(URI.create("https://api.spring-finance.com.br/erros/account-no-user"));
+        problemDetail.setDetail(e.getMessage());
+
+        return problemDetail;
+    }
 }
