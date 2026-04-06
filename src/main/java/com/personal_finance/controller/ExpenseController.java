@@ -43,7 +43,12 @@ public class ExpenseController {
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id){
         expenseService.delete(id);
-
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/pay/{id}")
+    public ResponseEntity<Void> payExpense(@PathVariable UUID id){
+        expenseService.payExpense(id);
+        return ResponseEntity.ok().build();
     }
 }

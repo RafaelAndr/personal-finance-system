@@ -3,6 +3,7 @@ package com.personal_finance.service;
 import com.personal_finance.dto.expense.ExpenseRequestDto;
 import com.personal_finance.entity.Account;
 import com.personal_finance.entity.Expense;
+import com.personal_finance.exception.ExpenseAlreadyPaidException;
 import com.personal_finance.mapper.ExpenseMapper;
 import com.personal_finance.repository.AccountRepository;
 import com.personal_finance.repository.ExpenseRepository;
@@ -37,6 +38,20 @@ public class ExpenseService {
     public List<Expense> getAllAccountExpenses(UUID accountId){
         Account account = accountService.searchById(accountId);
         return expenseRepository.findByAccount(account);
+    }
+
+    public void payExpense(UUID id){
+        Expense expense = getExpense(id);
+        Account account = accountService.searchById(expense.getAccount().getId());
+        account.setBalance(account.getBalance().subtract(expense.getValue()));
+        accountService.save(account);
+
+        if (expense.isPaid()) {
+            throw new ExpenseAlreadyPaidException("Expense is already paid");
+        }
+
+        expense.setPaid(true);
+        expenseRepository.save(expense);
     }
 
     public void delete(UUID id){
