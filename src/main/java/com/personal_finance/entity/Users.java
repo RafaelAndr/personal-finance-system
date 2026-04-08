@@ -48,6 +48,9 @@ public class Users {
     @OneToMany(mappedBy = "user")
     private List<Account> accounts;
 
+    @OneToMany(mappedBy = "user")
+    private List<Income> incomes;
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

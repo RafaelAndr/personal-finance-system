@@ -25,4 +25,12 @@ public class Income {
 
     @Column(name = "receipt_date")
     private LocalDate receiptDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
+    private Account account;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private Users user;
 }
