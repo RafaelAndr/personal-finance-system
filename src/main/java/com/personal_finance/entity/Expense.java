@@ -32,6 +32,9 @@ public class Expense {
     @JoinColumn(name = "user_id")
     private Users user;
 
+    @OneToOne(mappedBy = "expense")
+    private Payment payment;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "expense_category")
     private ExpenseCategory expenseCategory;

@@ -2,9 +2,12 @@ package com.personal_finance.service;
 
 import com.personal_finance.dto.expense.ExpenseRequestDto;
 import com.personal_finance.dto.expense.ExpenseResponseDto;
+import com.personal_finance.dto.payment.PaymentRequestDto;
 import com.personal_finance.entity.Account;
 import com.personal_finance.entity.Expense;
+import com.personal_finance.entity.Payment;
 import com.personal_finance.entity.Users;
+import com.personal_finance.entity.enums.PaymentMethod;
 import com.personal_finance.exception.AccessDeniedException;
 import com.personal_finance.exception.AccessForbiddenException;
 import com.personal_finance.exception.ExpenseAlreadyPaidException;
@@ -15,6 +18,7 @@ import com.personal_finance.security.SecurityService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,6 +32,7 @@ public class ExpenseService {
     private final ExpenseMapper expenseMapper;
     private final SecurityService securityService;
     private final AccountService accountService;
+    private final PaymentService paymentService;
 
     public ExpenseResponseDto save(ExpenseRequestDto expenseRequestDto){
 
@@ -65,17 +70,34 @@ public class ExpenseService {
         return expenseRepository.findByAccount(account);
     }
 
-    public void payExpense(UUID id){
+    @Transactional
+    public void payExpense(UUID id, PaymentRequestDto paymentRequestDto){
+
+        Users userLoggedIn = securityService.getUserLoggedIn();
+
         Expense expense = getExpense(id);
-        Account account = accountService.searchById(expense.getAccount().getId());
-        account.setBalance(account.getBalance().subtract(expense.getValue()));
-        accountService.save(account);
 
         if (expense.isPaid()) {
             throw new ExpenseAlreadyPaidException("Expense is already paid");
         }
 
+        if (!expense.getUser().getId().equals(userLoggedIn.getId())){
+            throw new AccessForbiddenException("You can't pay this expense because it is not yours");
+        }
+
+        Payment payment = new Payment();
+
+        payment.setExpense(expense);
+        payment.setUser(userLoggedIn);
+        payment.setPaymentMethod(paymentRequestDto.paymentMethod());
+
+        Account account = accountService.searchById(expense.getAccount().getId());
+        account.setBalance(account.getBalance().subtract(expense.getValue()));
+
         expense.setPaid(true);
+
+        accountService.save(account);
+        paymentService.save(payment);
         expenseRepository.save(expense);
     }
 
@@ -87,9 +109,9 @@ public class ExpenseService {
             throw new AccessForbiddenException("You can't delete this expense");
         }
 
-        Account account = accountService.searchById(expense.getAccount().getId());
-        account.setBalance(account.getBalance().subtract(expense.getValue()));
-        accountService.save(account);
+//        Account account = accountService.searchById(expense.getAccount().getId());
+//        account.setBalance(account.getBalance().subtract(expense.getValue()));
+//        accountService.save(account);
         expenseRepository.delete(expense);
     }
 
