@@ -52,4 +52,14 @@ public class ExpenseController {
         expenseService.payExpense(id);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/notPaid")
+    public ResponseEntity<List<ExpenseResponseDto>> findNotPaidExpenses(){
+        return ResponseEntity.ok(expenseService.listNotPaidExpenses());
+    }
+
+    @GetMapping("/paid")
+    public ResponseEntity<List<ExpenseResponseDto>> findPaidExpenses(){
+        return ResponseEntity.ok(expenseService.listPaidExpenses());
+    }
 }

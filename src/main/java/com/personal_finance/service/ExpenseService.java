@@ -12,6 +12,7 @@ import com.personal_finance.exception.ExpenseNegativeException;
 import com.personal_finance.mapper.ExpenseMapper;
 import com.personal_finance.repository.ExpenseRepository;
 import com.personal_finance.security.SecurityService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -56,7 +57,7 @@ public class ExpenseService {
     }
 
     public Expense getExpense(UUID id){
-        return expenseRepository.findById(id).orElseThrow(() -> new RuntimeException("Expense not found"));
+        return expenseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Expense not found"));
     }
 
     public List<Expense> getAllAccountExpenses(UUID accountId){
@@ -79,10 +80,28 @@ public class ExpenseService {
     }
 
     public void delete(UUID id){
+        Users userLoggedIn = securityService.getUserLoggedIn();
         Expense expense = getExpense(id);
+
+        if (!expense.getUser().getId().equals(userLoggedIn.getId())){
+            throw new AccessForbiddenException("You can't delete this expense");
+        }
+
         Account account = accountService.searchById(expense.getAccount().getId());
         account.setBalance(account.getBalance().subtract(expense.getValue()));
         accountService.save(account);
         expenseRepository.delete(expense);
+    }
+
+    public List<ExpenseResponseDto> listNotPaidExpenses(){
+        Users user = securityService.getUserLoggedIn();
+        List<Expense> expenses = expenseRepository.findNotPaidExpenses(user.getId());
+        return expenses.stream().map(expenseMapper::toDto).toList();
+    }
+
+    public List<ExpenseResponseDto> listPaidExpenses(){
+        Users user = securityService.getUserLoggedIn();
+        List<Expense> expenses = expenseRepository.findPaidExpenses(user.getId());
+        return expenses.stream().map(expenseMapper::toDto).toList();
     }
 }
