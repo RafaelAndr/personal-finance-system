@@ -1,6 +1,7 @@
 package com.personal_finance.controller;
 
 import com.personal_finance.dto.expense.ExpenseRequestDto;
+import com.personal_finance.dto.expense.ExpenseResponseDto;
 import com.personal_finance.entity.Expense;
 import com.personal_finance.mapper.ExpenseMapper;
 import com.personal_finance.service.ExpenseService;
@@ -22,18 +23,18 @@ public class ExpenseController {
     private final ExpenseMapper expenseMapper;
 
     @PostMapping
-    public ResponseEntity<ExpenseRequestDto> create(@RequestBody @Valid ExpenseRequestDto expenseRequestDto){
-        Expense expenseSaved = expenseService.save(expenseRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(expenseMapper.toDto(expenseSaved));
+    public ResponseEntity<ExpenseResponseDto> create(@RequestBody @Valid ExpenseRequestDto expenseRequestDto){
+        ExpenseResponseDto expenseSaved = expenseService.save(expenseRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(expenseSaved);
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<ExpenseRequestDto> getDetail(@PathVariable UUID id){
+    public ResponseEntity<ExpenseResponseDto> getDetail(@PathVariable UUID id){
         return ResponseEntity.ok(expenseMapper.toDto(expenseService.getExpense(id)));
     }
 
     @GetMapping("/account/{accountId}")
-    public ResponseEntity<List<ExpenseRequestDto>> getAllAccountExpense(@PathVariable UUID accountId){
+    public ResponseEntity<List<ExpenseResponseDto>> getAllAccountExpense(@PathVariable UUID accountId){
         return ResponseEntity.ok(expenseService.getAllAccountExpenses(accountId)
                 .stream()
                 .map(expenseMapper::toDto)

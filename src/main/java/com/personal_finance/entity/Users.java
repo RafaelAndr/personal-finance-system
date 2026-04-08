@@ -51,6 +51,9 @@ public class Users {
     @OneToMany(mappedBy = "user")
     private List<Income> incomes;
 
+    @OneToMany(mappedBy = "user")
+    private List<Expense> expenses;
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

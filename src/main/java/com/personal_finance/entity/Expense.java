@@ -28,6 +28,10 @@ public class Expense {
     @Column(name = "paid")
     private boolean paid;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private Users user;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "expense_category")
     private ExpenseCategory expenseCategory;

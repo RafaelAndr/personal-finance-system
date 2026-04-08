@@ -6,7 +6,7 @@ import com.personal_finance.entity.Account;
 import com.personal_finance.entity.Income;
 import com.personal_finance.entity.Users;
 import com.personal_finance.exception.AccessDeniedException;
-import com.personal_finance.exception.AccountHasNoUserException;
+import com.personal_finance.exception.AccessForbiddenException;
 import com.personal_finance.exception.IncomeNegativeException;
 import com.personal_finance.mapper.IncomeMapper;
 import com.personal_finance.repository.IncomeRepository;
@@ -38,6 +38,11 @@ public class IncomeService {
 
         if (incomeRequestDto.accountId() != null) {
             Account account = accountService.searchById(incomeRequestDto.accountId());
+
+            if (!account.getUser().getId().equals(userLoggedIn.getId())){
+                throw new AccessForbiddenException("You can't register an income to an account it is not yours");
+            }
+
             Income income = incomeMapper.toEntity(incomeRequestDto);
             income.setAccount(account);
             income.setUser(userLoggedIn);
