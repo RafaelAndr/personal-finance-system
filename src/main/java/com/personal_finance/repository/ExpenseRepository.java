@@ -19,4 +19,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
 
     @Query("SELECT e FROM Expense e WHERE e.paid = true AND e.user.id = :userId")
     List<Expense> findPaidExpenses(@Param("userId") UUID userId);
+
+    @Query("SELECT e FROM Expense e WHERE e.paid = false AND e.account.id = :accountId")
+    List<Expense> findNotPaidExpensesByAccount(@Param("accountId") UUID accountId);
 }

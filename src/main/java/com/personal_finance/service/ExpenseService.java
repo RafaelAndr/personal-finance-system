@@ -112,15 +112,24 @@ public class ExpenseService {
             throw new AccessForbiddenException("You can't delete this expense");
         }
 
-//        Account account = accountService.searchById(expense.getAccount().getId());
-//        account.setBalance(account.getBalance().subtract(expense.getValue()));
-//        accountService.save(account);
         expenseRepository.delete(expense);
     }
 
     public List<ExpenseResponseDto> listNotPaidExpenses(){
         Users user = securityService.getUserLoggedIn();
         List<Expense> expenses = expenseRepository.findNotPaidExpenses(user.getId());
+        return expenses.stream().map(expenseMapper::toDto).toList();
+    }
+
+    public List<ExpenseResponseDto> listNotPaidExpensesByAccount(UUID accountId){
+        Users user = securityService.getUserLoggedIn();
+        Account account = accountService.searchById(accountId);
+
+        if (!user.getId().equals(account.getUser().getId())){
+            throw new AccessForbiddenException("You can't access the expenses of this account");
+        }
+
+        List<Expense> expenses = expenseRepository.findNotPaidExpensesByAccount(accountId);
         return expenses.stream().map(expenseMapper::toDto).toList();
     }
 

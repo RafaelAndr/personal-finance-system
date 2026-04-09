@@ -58,6 +58,11 @@ public class ExpenseController {
         return ResponseEntity.ok(expenseService.listNotPaidExpenses());
     }
 
+    @GetMapping("/notPaid/{accountId}")
+    public ResponseEntity<List<ExpenseResponseDto>> findNotPaidExpensesByAccount(@PathVariable UUID accountId){
+        return ResponseEntity.ok(expenseService.listNotPaidExpensesByAccount(accountId));
+    }
+
     @GetMapping("/paid")
     public ResponseEntity<List<ExpenseResponseDto>> findPaidExpenses(){
         return ResponseEntity.ok(expenseService.listPaidExpenses());
