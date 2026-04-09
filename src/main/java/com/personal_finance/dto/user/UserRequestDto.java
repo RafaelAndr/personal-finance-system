@@ -6,6 +6,7 @@ public record UserRequestDto(
         String name,
         String username,
         String password,
+        String confirmPassword,
         Role role
 ) {
 }

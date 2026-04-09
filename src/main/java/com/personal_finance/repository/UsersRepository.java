@@ -13,4 +13,6 @@ public interface UsersRepository extends JpaRepository<Users, UUID> {
 
     @Query("select u.role from Users u where u.username like :username")
     Role findRoleByUsername(String username);
+
+    boolean existsByUsername(String username);
 }

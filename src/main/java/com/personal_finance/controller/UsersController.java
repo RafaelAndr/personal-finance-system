@@ -1,5 +1,6 @@
 package com.personal_finance.controller;
 
+import com.personal_finance.dto.user.ChangePasswordDto;
 import com.personal_finance.dto.user.UserResponseDto;
 import com.personal_finance.dto.user.UserRequestDto;
 import com.personal_finance.entity.Users;
@@ -10,8 +11,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,10 +37,14 @@ public class UsersController {
             @ApiResponse(responseCode = "409", description = "User already registered"),
     })
     public ResponseEntity<UserResponseDto> create(@RequestBody UserRequestDto userRequestDto){
-        Users userCreated = usersService.save(userMapper.toEntity(userRequestDto));
+        Users userCreated = usersService.register(userRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDto(userCreated));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDto> getMe(){
+        return ResponseEntity.ok(usersService.getMe());
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getById(@PathVariable UUID id){
@@ -51,6 +58,12 @@ public class UsersController {
         return ResponseEntity.ok(userMapper.toDto(userToUpdatePassword));
     }
 
+    @PatchMapping("/change-password")
+    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordDto dto) {
+        usersService.changePassword(dto);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> getAll(){
         List<Users> users = usersService.findAll();
@@ -60,5 +73,12 @@ public class UsersController {
                 .toList();
 
         return ResponseEntity.ok(listResponseDto);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID id){
+        usersService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 }
