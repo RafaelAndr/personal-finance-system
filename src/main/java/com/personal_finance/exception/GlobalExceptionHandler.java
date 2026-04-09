@@ -125,6 +125,18 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ProblemDetail UserAlreadyExistsException(UserAlreadyExistsException e){
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+
+        problemDetail.setTitle("Business rule violation");
+        problemDetail.setType(URI.create("https://api.spring-finance.com.br/erros/account-no-user"));
+        problemDetail.setDetail(e.getMessage());
+
+        return problemDetail;
+    }
+
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ProblemDetail handleEntityNotFoundException(EntityNotFoundException e){
