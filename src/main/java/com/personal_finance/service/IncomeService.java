@@ -46,7 +46,6 @@ public class IncomeService {
             Income income = incomeMapper.toEntity(incomeRequestDto);
             income.setAccount(account);
             income.setUser(userLoggedIn);
-            return incomeMapper.toDto(incomeRepository.save(income));
         }
 
         Income income = incomeMapper.toEntity(incomeRequestDto);
