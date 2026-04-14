@@ -3,12 +3,15 @@ package com.personal_finance.entity;
 import com.personal_finance.entity.enums.ExpenseCategory;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 public class Expense {
 
     @Id

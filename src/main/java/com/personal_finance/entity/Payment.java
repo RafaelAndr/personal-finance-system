@@ -3,12 +3,15 @@ package com.personal_finance.entity;
 import com.personal_finance.entity.enums.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.userdetails.User;
 
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 public class Payment {
 
     @Id

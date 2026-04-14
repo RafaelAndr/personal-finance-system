@@ -3,13 +3,16 @@ package com.personal_finance.entity;
 import com.personal_finance.entity.enums.IncomeCategory;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 public class Income {
 
     @Id
