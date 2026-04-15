@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ProblemDetail handleValidation(MethodArgumentNotValidException e){
 
         Map<String, String> errors = e
@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccountHasNoUserException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public ProblemDetail handleAccountGasNoUserException(AccountHasNoUserException e){
+    public ProblemDetail handleAccountHasNoUserException(AccountHasNoUserException e){
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_ENTITY);
 
         problemDetail.setTitle("Business rule violation");
@@ -69,7 +69,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ExpenseAlreadyPaidException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public ProblemDetail ExpenseAlreadyPaidException(ExpenseAlreadyPaidException e){
+    public ProblemDetail expenseAlreadyPaidException(ExpenseAlreadyPaidException e){
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_ENTITY);
 
         problemDetail.setTitle("Business rule violation");
@@ -79,34 +79,10 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(IncomeNegativeException.class)
+    @ExceptionHandler(NegativeValueException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public ProblemDetail IncomeNegativeException(IncomeNegativeException e){
+    public ProblemDetail handleNegativeValueException(NegativeValueException e){
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_ENTITY);
-
-        problemDetail.setTitle("Business rule violation");
-        problemDetail.setType(URI.create("https://api.spring-finance.com.br/erros/account-no-user"));
-        problemDetail.setDetail(e.getMessage());
-
-        return problemDetail;
-    }
-
-    @ExceptionHandler(ExpenseNegativeException.class)
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public ProblemDetail ExpenseNegativeException(ExpenseNegativeException e){
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_ENTITY);
-
-        problemDetail.setTitle("Business rule violation");
-        problemDetail.setType(URI.create("https://api.spring-finance.com.br/erros/account-no-user"));
-        problemDetail.setDetail(e.getMessage());
-
-        return problemDetail;
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ProblemDetail handleAccessDeniedException(AccessDeniedException e){
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
 
         problemDetail.setTitle("Business rule violation");
         problemDetail.setType(URI.create("https://api.spring-finance.com.br/erros/account-no-user"));
@@ -129,7 +105,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InsufficientBalanceException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public ProblemDetail InsufficientBalanceException(InsufficientBalanceException e){
+    public ProblemDetail handleInsufficientBalanceException(InsufficientBalanceException e){
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_ENTITY);
 
         problemDetail.setTitle("Business rule violation");
@@ -141,7 +117,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityAlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ProblemDetail entityAlreadyExistsException(EntityAlreadyExistsException e){
+    public ProblemDetail handleEntityAlreadyExistsException(EntityAlreadyExistsException e){
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.CONFLICT);
 
         problemDetail.setTitle("Business rule violation");
