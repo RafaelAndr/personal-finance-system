@@ -25,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -59,7 +60,7 @@ class ExpenseServiceTest {
     }
 
     @Test
-    @DisplayName("Deve lançar ExpenseNegativeException quando valor for zero")
+    @DisplayName("Shoud throw ExpenseNegativeException when value is zero")
     void save_ShouldThrowException_WhenValueIsZero() {
         ExpenseRequestDto request = new ExpenseRequestDto(
                 null, "Aluguel", BigDecimal.ZERO, ExpenseCategory.HOUSING
@@ -72,7 +73,7 @@ class ExpenseServiceTest {
     }
 
     @Test
-    @DisplayName("Deve lançar ExpenseNegativeException quando valor for negativo")
+    @DisplayName("Shoud throw ExpenseNegativeException when value is negative")
     void save_ShouldThrowException_WhenValueIsNegative() {
         ExpenseRequestDto request = new ExpenseRequestDto(
                 null, "Aluguel", new BigDecimal("-50.00"), ExpenseCategory.HOUSING
@@ -83,7 +84,7 @@ class ExpenseServiceTest {
     }
 
     @Test
-    @DisplayName("Deve lançar AccessForbiddenException quando conta não pertence ao usuário logado")
+    @DisplayName("Should throw AccessForbiddenException when account don't belong to user logged in")
     void save_ShouldThrowException_WhenAccountDoesNotBelongToUser() {
         Users otherUser = new Users();
         otherUser.setUsername("outro");
@@ -110,7 +111,7 @@ class ExpenseServiceTest {
     }
 
     @Test
-    @DisplayName("Deve salvar despesa com sucesso quando dados são válidos")
+    @DisplayName("Should save expense successfully when data are valid")
     void save_ShouldPersistExpense_WhenDataIsValid() {
         UUID accountId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
@@ -153,6 +154,7 @@ class ExpenseServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw EntityNotFoundException when expense not found")
     void getExpense_ShouldThrowException_WhenExpenseNotFound() {
         UUID id = UUID.randomUUID();
 
@@ -338,6 +340,172 @@ class ExpenseServiceTest {
 
         assertThatThrownBy(() -> expenseService.payExpense(expenseId, request))
                 .isInstanceOf(InsufficientBalanceException.class)
-                .hasMessage("Your balance is to small for this payment");
+                .hasMessage("Insufficient balance to complete this payment");
+    }
+
+    @Test
+    void deleteExpense_ShouldDeleteExpense_WhenUserIsOwner() {
+        Users user = new Users();
+        user.setId(UUID.randomUUID());
+
+        UUID expenseId = UUID.randomUUID();
+        Expense expense = new Expense();
+        expense.setId(expenseId);
+        expense.setUser(user);
+
+        when(securityService.getUserLoggedIn()).thenReturn(user);
+        when(expenseRepository.findById(expenseId)).thenReturn(Optional.of(expense));
+
+        expenseService.delete(expenseId);
+
+        verify(expenseRepository).delete(expense);
+    }
+
+    @Test
+    void deleteExpense_ShouldThrowException_WhenUserIsNotOwner() {
+        Users user = new Users();
+        user.setId(UUID.randomUUID());
+
+        Users otherUser = new Users();
+        otherUser.setId(UUID.randomUUID());
+
+        UUID expenseId = UUID.randomUUID();
+        Expense expense = new Expense();
+        expense.setId(expenseId);
+        expense.setUser(otherUser);
+
+        when(securityService.getUserLoggedIn()).thenReturn(user);
+        when(expenseRepository.findById(expenseId)).thenReturn(Optional.of(expense));
+
+        assertThatThrownBy(() -> expenseService.delete(expenseId))
+                .isInstanceOf(AccessForbiddenException.class);
+
+        verify(expenseRepository, never()).delete(any());
+    }
+
+    @Test
+    void shouldListNotPaidExpenses() {
+        Users user = new Users();
+        UUID userId = UUID.randomUUID();
+        user.setId(userId);
+
+        Expense expense = new Expense();
+        ExpenseResponseDto dto = new ExpenseResponseDto(
+                UUID.randomUUID(),
+                null,
+                userId,
+                "Teste",
+                new BigDecimal("50.00"),
+                ExpenseCategory.LEISURE
+        );
+
+        List<Expense> expenses = List.of(expense);
+
+        when(securityService.getUserLoggedIn()).thenReturn(user);
+        when(expenseRepository.findNotPaidExpenses(userId)).thenReturn(expenses);
+        when(expenseMapper.toDto(expense)).thenReturn(dto);
+
+        List<ExpenseResponseDto> result = expenseService.listNotPaidExpenses();
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst()).isEqualTo(dto);
+
+        verify(expenseRepository).findNotPaidExpenses(userId);
+        verify(expenseMapper).toDto(expense);
+    }
+
+    @Test
+    void shouldListNotPaidExpensesByAccount() {
+        Users user = new Users();
+        UUID userId = UUID.randomUUID();
+        user.setId(userId);
+
+        Account account = new Account();
+        UUID accountId = UUID.randomUUID();
+        account.setId(accountId);
+        account.setUser(user);
+
+        Expense expense = new Expense();
+        expense.setAccount(account);
+        ExpenseResponseDto dto = new ExpenseResponseDto(
+                UUID.randomUUID(),
+                accountId,
+                userId,
+                "Teste",
+                new BigDecimal("50.00"),
+                ExpenseCategory.LEISURE
+        );
+
+        List<Expense> expenses = List.of(expense);
+
+        when(accountService.searchById(accountId)).thenReturn(account);
+        when(securityService.getUserLoggedIn()).thenReturn(user);
+        when(expenseRepository.findNotPaidExpensesByAccount(accountId)).thenReturn(expenses);
+        when(expenseMapper.toDto(expense)).thenReturn(dto);
+
+        List<ExpenseResponseDto> result = expenseService.listNotPaidExpensesByAccount(accountId);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst()).isEqualTo(dto);
+
+        verify(expenseRepository).findNotPaidExpensesByAccount(accountId);
+        verify(expenseMapper).toDto(expense);
+    }
+
+    @Test
+    void listNotPaidExpensesByAccount_ShouldThrowException_WhenUserIsNotAccountOwner() {
+        Users user = new Users();
+        UUID userId = UUID.randomUUID();
+        user.setId(userId);
+
+        Users otherUser = new Users();
+        otherUser.setId(UUID.randomUUID());
+
+        Account account = new Account();
+        UUID accountId = UUID.randomUUID();
+        account.setId(accountId);
+        account.setUser(otherUser);
+
+        when(accountService.searchById(accountId)).thenReturn(account);
+        when(securityService.getUserLoggedIn()).thenReturn(user);
+
+        assertThatThrownBy(() -> expenseService.listNotPaidExpensesByAccount(accountId))
+                .isInstanceOf(AccessForbiddenException.class);
+
+        verify(accountService).searchById(accountId);
+        verify(expenseRepository, never()).findNotPaidExpensesByAccount(any());
+        verify(expenseMapper, never()).toDto(any());
+    }
+
+    @Test
+    void shouldListPaidExpenses() {
+        Users user = new Users();
+        UUID userId = UUID.randomUUID();
+        user.setId(userId);
+
+        Expense expense = new Expense();
+
+        ExpenseResponseDto dto = new ExpenseResponseDto(
+                UUID.randomUUID(),
+                null,
+                userId,
+                "Teste",
+                new BigDecimal("50.00"),
+                ExpenseCategory.LEISURE
+        );
+
+        List<Expense> expenses = List.of(expense);
+
+        when(securityService.getUserLoggedIn()).thenReturn(user);
+        when(expenseRepository.findPaidExpenses(userId)).thenReturn(expenses);
+        when(expenseMapper.toDto(expense)).thenReturn(dto);
+
+        List<ExpenseResponseDto> result = expenseService.listPaidExpenses();
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst()).isEqualTo(dto);
+
+        verify(expenseRepository).findPaidExpenses(userId);
+        verify(expenseMapper).toDto(expense);
     }
 }
