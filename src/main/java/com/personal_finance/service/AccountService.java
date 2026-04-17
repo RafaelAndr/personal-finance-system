@@ -6,8 +6,6 @@ import com.personal_finance.dto.account.AccountTotalBalanceDto;
 import com.personal_finance.dto.account.UpdateBalanceDto;
 import com.personal_finance.entity.Account;
 import com.personal_finance.entity.Users;
-import com.personal_finance.exception.AccessForbiddenException;
-import com.personal_finance.exception.AccountHasNoUserException;
 import com.personal_finance.exception.EntityAlreadyExistsException;
 import com.personal_finance.repository.AccountRepository;
 import com.personal_finance.security.SecurityService;
@@ -16,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,11 +24,15 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final SecurityService securityService;
 
+    private Users getLoggedUser(){
+        return securityService.getUserLoggedIn();
+    }
+
     public Account save(Account account){
-        Users userLogged = securityService.getUserLoggedIn();
+        Users userLogged = getLoggedUser();
         account.setUser(userLogged);
 
-        if (existBankName(account.getBankName())){
+        if (existBankNameWithUser(account.getBankName())){
             throw new EntityAlreadyExistsException("Bank name already exists");
         }
 
@@ -45,87 +46,83 @@ public class AccountService {
         );
     }
 
-    private boolean existBankName(String bankName){
-        return accountRepository.existsByBankName(bankName);
+    private boolean existBankNameWithUser(String bankName){
+        Users userLogged = getLoggedUser();
+        return accountRepository.existsByBankNameAndUser(bankName, userLogged);
     }
 
     public void editBankName(UUID accountId, AccountRequestDto accountRequestDto){
-        Account account = searchById(accountId);
 
-        account.setBankName(accountRequestDto.bankName());
+        Account account = searchById(accountId);
+        Users userLogged = getLoggedUser();
+
+        account.validateOwnership(userLogged.getId());
+
+        String newName = accountRequestDto.bankName();
+
+        if (accountRepository.existsByBankNameAndUser(newName, userLogged)
+                && !account.getBankName().equalsIgnoreCase(newName)) {
+            throw new EntityAlreadyExistsException("Bank name already exists");
+        }
+
+        account.changeBankName(newName);
 
         accountRepository.save(account);
     }
 
-    public void delete(UUID id) throws AccessDeniedException{
-        Users userLoggedIn = securityService.getUserLoggedIn();
+    public void delete(UUID id){
+        Users userLogged = getLoggedUser();
 
         Account account = searchById(id);
 
-        if (account.getUser() == null){
-            throw new AccountHasNoUserException("Account has no user associated");
-        }
-
-        if (!account.getUser().getId().equals(userLoggedIn.getId())){
-            throw new AccessDeniedException("You are not allowed to delete this account");
-        }
+        account.validateOwnership(userLogged.getId());
 
         accountRepository.deleteById(id);
     }
 
     public List<AccountBalanceDto> getUserAccounts(){
-        Users userLoggedIn = securityService.getUserLoggedIn();
+        Users userLogged = getLoggedUser();
 
-        List<Account> accounts = accountRepository.findByUser(userLoggedIn);
+        List<Account> accounts = accountRepository.findByUser(userLogged);
 
         return accounts.stream().map(
-                account -> new AccountBalanceDto(account.getId(), userLoggedIn.getName(), account.getBalance(), account.getBankName()))
+                account -> new AccountBalanceDto(account.getId(), userLogged.getName(), account.getBalance(), account.getBankName()))
                 .toList();
     }
 
     public AccountTotalBalanceDto getTotalUserBalance(){
-        Users userLoggedIn = securityService.getUserLoggedIn();
+        Users userLogged = getLoggedUser();
 
-        List<Account> accounts = accountRepository.findByUser(userLoggedIn);
+        List<Account> accounts = accountRepository.findByUser(userLogged);
 
         BigDecimal total = accounts.stream()
                 .map(account -> account.getBalance() != null ? account.getBalance() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return new AccountTotalBalanceDto(total);
+        return new AccountTotalBalanceDto(userLogged.getName(), total);
     }
 
     public void addAmount(UUID id, UpdateBalanceDto updateBalanceDto){
-        Users userLoggedIn = securityService.getUserLoggedIn();
+        Users userLogged = getLoggedUser();
 
         Account account = searchById(id);
 
-        if (!account.getUser().getId().equals(userLoggedIn.getId())){
-            throw new AccessForbiddenException("You can't deposit to this account");
-        }
+        account.validateOwnership(userLogged.getId());
 
-        BigDecimal newAmount = account.getBalance().add(updateBalanceDto.amount());
+        account.credit(updateBalanceDto.amount());
 
-        account.setBalance(newAmount);
         accountRepository.save(account);
     }
 
     public void removeAmount(UUID id, UpdateBalanceDto updateBalanceDto){
-        Users userLoggedIn = securityService.getUserLoggedIn();
+        Users userLogged = getLoggedUser();
 
         Account account = searchById(id);
 
-        if (!account.getUser().getId().equals(userLoggedIn.getId())){
-            throw new AccessForbiddenException("You can't withdraw from this account");
-        }
+        account.validateOwnership(userLogged.getId());
 
-        if (account.getBalance().compareTo(updateBalanceDto.amount()) < 0){
-            throw new AccessForbiddenException("Account has no sufficient amount");
-        }
+        account.debit(updateBalanceDto.amount());
 
-        BigDecimal newAmount = account.getBalance().subtract(updateBalanceDto.amount());
-
-        account.setBalance(newAmount);
         accountRepository.save(account);
     }
 }

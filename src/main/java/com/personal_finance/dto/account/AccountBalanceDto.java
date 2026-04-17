@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public record AccountBalanceDto(
         UUID id,
-        String name,
+        String owner,
         BigDecimal balance,
         String bankName
 ) {

@@ -15,5 +15,5 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     @Query("SELECT COALESCE(SUM(a.balance), 0) FROM Account a WHERE a.user.id = :userId")
     BigDecimal getTotalBalanceByUserId(UUID userId);
 
-    boolean existsByBankName(String bankName);
+    boolean existsByBankNameAndUser(String bankName, Users user);
 }
