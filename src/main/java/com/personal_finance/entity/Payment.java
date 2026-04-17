@@ -2,11 +2,12 @@ package com.personal_finance.entity;
 
 import com.personal_finance.entity.enums.PaymentMethod;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.security.core.userdetails.User;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -25,6 +26,16 @@ public class Payment {
     @OneToOne
     @JoinColumn(name = "expense_id")
     private Expense expense;
+
+    @Column(name = "expense_value")
+    private BigDecimal expenseValue;
+
+    @CreationTimestamp
+    @Column(name = "payment_date")
+    private LocalDate paymentDate;
+
+    @Column(name = "username")
+    private String userName;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
