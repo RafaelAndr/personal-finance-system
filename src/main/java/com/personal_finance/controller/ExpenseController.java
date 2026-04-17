@@ -1,5 +1,6 @@
 package com.personal_finance.controller;
 
+import com.personal_finance.dto.account.AccountTotalExpenseDto;
 import com.personal_finance.dto.expense.ExpenseRequestDto;
 import com.personal_finance.dto.expense.ExpenseResponseDto;
 import com.personal_finance.dto.payment.PaymentRequestDto;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,15 +52,15 @@ public class ExpenseController {
     @PostMapping("/pay/{id}")
     public ResponseEntity<Void> payExpense(@PathVariable UUID id, @RequestBody PaymentRequestDto paymentRequestDto){
         expenseService.payExpense(id, paymentRequestDto);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/notPaid")
+    @GetMapping("/not-paid")
     public ResponseEntity<List<ExpenseResponseDto>> findNotPaidExpenses(){
         return ResponseEntity.ok(expenseService.listNotPaidExpenses());
     }
 
-    @GetMapping("/notPaid/{accountId}")
+    @GetMapping("/not-paid/{accountId}")
     public ResponseEntity<List<ExpenseResponseDto>> findNotPaidExpensesByAccount(@PathVariable UUID accountId){
         return ResponseEntity.ok(expenseService.listNotPaidExpensesByAccount(accountId));
     }
@@ -66,5 +68,10 @@ public class ExpenseController {
     @GetMapping("/paid")
     public ResponseEntity<List<ExpenseResponseDto>> findPaidExpenses(){
         return ResponseEntity.ok(expenseService.listPaidExpenses());
+    }
+
+    @GetMapping("/account/total-expense/{id}")
+    public ResponseEntity<AccountTotalExpenseDto> getTotalExpenseAccountValue(@PathVariable UUID id){
+        return ResponseEntity.ok(expenseService.getTotalExpenseAccountValue(id));
     }
 }

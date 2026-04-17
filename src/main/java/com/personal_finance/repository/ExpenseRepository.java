@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,4 +23,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
 
     @Query("SELECT e FROM Expense e WHERE e.paid = false AND e.account.id = :accountId")
     List<Expense> findNotPaidExpensesByAccount(@Param("accountId") UUID accountId);
+
+    @Query("SELECT COALESCE(SUM(e.value), 0) FROM Expense e WHERE e.account.id = :accountId")
+    BigDecimal totalAccountExpenseValue(UUID accountId);
 }

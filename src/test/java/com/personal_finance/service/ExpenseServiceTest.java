@@ -220,7 +220,6 @@ class ExpenseServiceTest {
         verify(expenseRepository).save(expense);
 
         verify(accountService, never()).searchById(any());
-        verify(accountService, never()).update(any());
     }
 
     @Test
@@ -258,7 +257,6 @@ class ExpenseServiceTest {
         verify(expenseRepository).save(expense);
 
         verify(accountService).searchById(any());
-        verify(accountService).update(any());
     }
 
     @Test
@@ -309,7 +307,7 @@ class ExpenseServiceTest {
 
         assertThatThrownBy(() -> expenseService.payExpense(expenseId, request))
                 .isInstanceOf(AccessForbiddenException.class)
-                .hasMessage("You can't pay this expense because it is not yours");
+                .hasMessage("You can't access this expense");
     }
 
     @Test
@@ -340,7 +338,7 @@ class ExpenseServiceTest {
 
         assertThatThrownBy(() -> expenseService.payExpense(expenseId, request))
                 .isInstanceOf(InsufficientBalanceException.class)
-                .hasMessage("Insufficient balance to complete this payment");
+                .hasMessage("Insufficient balance");
     }
 
     @Test

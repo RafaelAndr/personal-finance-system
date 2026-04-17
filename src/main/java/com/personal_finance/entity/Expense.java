@@ -1,6 +1,8 @@
 package com.personal_finance.entity;
 
 import com.personal_finance.entity.enums.ExpenseCategory;
+import com.personal_finance.exception.AccessForbiddenException;
+import com.personal_finance.exception.ExpenseAlreadyPaidException;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -41,4 +43,21 @@ public class Expense {
     @Enumerated(EnumType.STRING)
     @Column(name = "expense_category")
     private ExpenseCategory expenseCategory;
+
+    public void validateOwnership(UUID userId){
+        if (this.user == null){
+            throw new EntityNotFoundException("Expense has no user associated");
+        }
+
+        if (!this.user.getId().equals(userId)){
+            throw new AccessForbiddenException("You can't access this expense");
+        }
+    }
+
+    public void markAsPaid(){
+        if (this.paid){
+            throw new ExpenseAlreadyPaidException("Expense is already paid");
+        }
+        this.paid = true;
+    }
 }
