@@ -28,7 +28,6 @@ public class UsersService {
     private final PasswordEncoder passwordEncoder;
     private final SecurityService securityService;
 
-    @Transactional
     public void register(UserRequestDto userRequestDto) {
 
         if (usersRepository.existsByUsername(userRequestDto.username())) {
@@ -61,8 +60,6 @@ public class UsersService {
         return userMapper.toDto(usersRepository.findById(userLoggedIn.getId()).orElseThrow(() -> new EntityNotFoundException("User not found")));
     }
 
-
-    @Transactional
     public void changePassword(ChangePasswordDto dto) {
 
         Users user = securityService.getUserLoggedIn();
@@ -99,5 +96,13 @@ public class UsersService {
 
     public void deleteUser(UUID id) {
         usersRepository.deleteById(id);
+    }
+
+    public void promoteToAdmin(UUID userId) {
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setRole(Role.ROLE_ADMIN);
+        usersRepository.save(user);
     }
 }

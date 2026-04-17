@@ -29,6 +29,7 @@ public class UsersController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDto> getById(@PathVariable UUID id){
         Users user = usersService.searchById(id);
         return ResponseEntity.ok(userMapper.toDto(user));
@@ -41,6 +42,7 @@ public class UsersController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseDto>> getAll(){
         List<Users> users = usersService.findAll();
 
@@ -56,5 +58,11 @@ public class UsersController {
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id){
         usersService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/promote")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void promoteToAdmin(@PathVariable UUID id) {
+        usersService.promoteToAdmin(id);
     }
 }
