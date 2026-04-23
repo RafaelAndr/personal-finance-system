@@ -56,8 +56,8 @@ public class UsersService {
 
     @Transactional(readOnly = true)
     public UserResponseDto getMe(){
-        Users userLoggedIn = securityService.getUserLoggedIn();
-        return userMapper.toDto(usersRepository.findById(userLoggedIn.getId()).orElseThrow(() -> new EntityNotFoundException("User not found")));
+        Users userLogged = securityService.getUserLoggedIn();
+        return userMapper.toDto(searchById(userLogged.getId()));
     }
 
     public void changePassword(ChangePasswordDto dto) {
@@ -89,18 +89,13 @@ public class UsersService {
         );
     }
 
-    @Transactional(readOnly = true)
-    public Role searchRoleByUsername(String username) {
-        return usersRepository.findRoleByUsername(username);
-    }
-
     public void deleteUser(UUID id) {
-        usersRepository.deleteById(id);
+        Users user = searchById(id); // lança exceção se não existir
+        usersRepository.delete(user);
     }
 
     public void promoteToAdmin(UUID userId) {
-        Users user = usersRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        Users user = searchById(userId);
 
         user.setRole(Role.ROLE_ADMIN);
         usersRepository.save(user);
