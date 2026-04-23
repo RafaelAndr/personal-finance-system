@@ -29,7 +29,6 @@ public class IncomeService {
     }
 
     public IncomeResponseDto save(IncomeRequestDto incomeRequestDto){
-
         Users userLoggedIn = getLoggedUser();
 
         Income income = incomeMapper.toEntity(incomeRequestDto);
@@ -46,12 +45,8 @@ public class IncomeService {
     }
 
     public IncomeResponseDto getIncome(UUID id){
-        Users userLogged = getLoggedUser();
-
         Income income = incomeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Income not found"));
-
-        income.validateOwnership(userLogged.getId());
 
         return incomeMapper.toDto(income);
     }
