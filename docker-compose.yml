@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16.3
+    container_name: financedb-prod
+    environment:
+      POSTGRES_USER: postgresprod
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: finance
+    ports:
+      - "5433:5432"
+    networks:
+      - finance-network
+
+  pgadmin:
+    image: dpage/pgadmin4:8.9
+    container_name: pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "15432:80"
+    depends_on:
+      - db
+    networks:
+      - finance-network
+
+  api:
+    build: .
+    container_name: finance-api-container
+    environment:
+      DATASOURCE_URL: jdbc:postgresql://db:5432/finance
+      DATASOURCE_USERNAME: postgresprod
+      DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    depends_on:
+      - db
+    networks:
+      - finance-network
+
+networks:
+  finance-network:
+    driver: bridge
